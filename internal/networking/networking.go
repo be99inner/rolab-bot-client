@@ -29,10 +29,10 @@ func ConnectAndServe(url string) {
 		log.Fatalf("Send error: %v\n", err)
 	}
 
-	respone, err := networking.ReceiveData(conn)
+	response, err := networking.ReceiveData(conn)
 	if err != nil {
 		log.Fatalf("Receive error: %v\n", err)
 	}
 
-	log.Printf("Receive response: %+v\n", respone)
+	log.Printf("Receive response: %+v\n", response)
 }
