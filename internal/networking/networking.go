@@ -2,8 +2,10 @@ package networking
 
 import (
 	"log"
+	"time"
 
 	"github.com/be99inner/rolab-bot-client/internal/gameinterface"
+	"github.com/be99inner/rolab-bot-client/internal/mock"
 	"github.com/be99inner/rolab-bot-utility/networking"
 )
 
@@ -15,24 +17,31 @@ func ConnectAndServe(url string) {
 	}
 	defer conn.Close()
 
-	// capture and send the game interface
-	img := gameinterface.CaptureGameInterface()
-	encodedImage := gameinterface.EncodeImage(img)
+	// ConnectAndServe connects to the server and handles communication
+	for {
+		// img := gameinterface.CaptureGameInterface()
+		img := mock.GenerateRandomImage()
+		encodedImage := gameinterface.EncodeImage(img)
 
-	data := networking.GameData{
-		EventType: "game_interface",
-		Payload:   encodedImage,
+		data := networking.GameData{
+			EventType: "game_interface",
+			Payload:   encodedImage,
+		}
+
+		err = networking.SendData(conn, data)
+		if err != nil {
+			log.Fatalf("Send error: %v\n", err)
+		}
+
+		// Receive and log the server's response
+		response, err := networking.ReceiveData(conn)
+		if err != nil {
+			log.Printf("Receive error: %v\n", err)
+			continue
+		}
+
+		log.Printf("Receive response: %+v\n", response)
+
+		time.Sleep(10 * time.Second)
 	}
-
-	err = networking.SendData(conn, data)
-	if err != nil {
-		log.Fatalf("Send error: %v\n", err)
-	}
-
-	response, err := networking.ReceiveData(conn)
-	if err != nil {
-		log.Fatalf("Receive error: %v\n", err)
-	}
-
-	log.Printf("Receive response: %+v\n", response)
 }
